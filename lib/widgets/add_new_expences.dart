@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:expence_master_yt/models/expence.dart';
 
 class AddNewExpences extends StatefulWidget {
-  const AddNewExpences({super.key});
+  //aluthin data ekk add krnn mulinm addnewexpences.dart eke function ekk hdnw( 1)
+  //data save kranna mulinm addnewexpences > app bar > expence ekata ewala ita passe
+  //expence > expencelist > expence tile ekata denw.
+  final void Function(ExepenceModel expence) onAddExpence;
+  const AddNewExpences({super.key, required this.onAddExpence});
 
   @override
   State<AddNewExpences> createState() => _AddNewExpencesState();
@@ -56,7 +60,40 @@ class _AddNewExpencesState extends State<AddNewExpences> {
     //convert the amount in to a double
 
     final userAmount = double.parse(_amountController.text.trim());
-    if (_titleController.text.trim().isEmpty || userAmount <= 0) {}
+    if (_titleController.text.trim().isEmpty || userAmount <= 0) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Enter valid Data"),
+            content: const Text(
+              "Please enter valid data for the title and the amount here the title cant be empty and the amount cant be less than zero",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Close"),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      //create the new expence
+      ExepenceModel newExpence = ExepenceModel(
+        title: _titleController.text.trim(),
+        amount: userAmount,
+        date: _selectedDate,
+        category: _selectedCategory,
+      );
+      //save the data
+      //data ekk store krn step eke (2) widget eke thiyen nisa eka haraha newExpence ekt cll krnw.ita pass expences.dart ekt yanawa
+      widget.onAddExpence(newExpence);
+      //save karala iwara unama auto close wenna
+      Navigator.pop(context);
+    }
   }
 
   //dis

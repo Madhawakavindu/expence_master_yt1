@@ -35,12 +35,21 @@ class _ExpencesState extends State<Expences> {
     ),
   ];
 
+  //add new expence
+  //(3) aluth expence ek hdnw.ita pass expence list ekt add krnw
+  void onAddNewExpence(ExepenceModel expence) {
+    setState(() {
+      _exepenceList.add(expence);
+    });
+  }
+
   //function to open a model overlay
   void _openAddExpencesOverlay() {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return AddNewExpences();
+        //(4) return krnw new expence eka
+        return AddNewExpences(onAddExpence: onAddNewExpence);
       },
     );
   }
