@@ -1,4 +1,5 @@
 import 'package:expence_master_yt/models/expence.dart';
+import 'package:expence_master_yt/widgets/add_new_expences.dart';
 import 'package:expence_master_yt/widgets/expence_list.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +40,7 @@ class _ExpencesState extends State<Expences> {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return AddNewExpences;
+        return AddNewExpences();
       },
     );
   }
