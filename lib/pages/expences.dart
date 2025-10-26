@@ -41,38 +41,78 @@ class _ExpencesState extends State<Expences> {
     setState(() {
       _exepenceList.add(expence);
     });
-  }
+    //function to open a model overlay
+    void _openAddExpencesOverlay() {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          //(4) return krnw new expence eka
+          return AddNewExpences(onAddExpence: onAddNewExpence);
+        },
+      );
+    }
 
-  //function to open a model overlay
-  void _openAddExpencesOverlay() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        //(4) return krnw new expence eka
-        return AddNewExpences(onAddExpence: onAddNewExpence);
-      },
-    );
-  }
+    void addNewExpences(ExepenceModel expence) {
+      setState(() {
+        _exepenceList.add(expence);
+      });
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Expence Master"),
-        backgroundColor: Colors.lightBlue,
-        elevation: 0,
-        actions: [
-          Container(
-            color: const Color.fromARGB(255, 94, 208, 73),
-            child: IconButton(
-              color: Colors.black,
-              onPressed: _openAddExpencesOverlay,
-              icon: const Icon(Icons.add),
-            ),
+    //remove a expence
+    void onDeleteExpence(ExepenceModel expence) {
+            setState(() {
+        _exepenceList.remove(expence);
+      });
+    }
+      //store the delecting expence
+      ExepenceModel deletingExpence = expence;
+      //get the index of the removing expence
+      final int removingIndex = _exepenceList.indexOf(expence);
+
+
+      //show snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("Delete Sucessfull"),
+          action: SnackBarAction(
+            label: "Undo",
+            onPressed: () {
+              setState(() {
+                _exepenceList.insert(removingIndex, deletingExpence);
+              });
+            },
           ),
-        ],
-      ),
-      body: Column(children: [ExpenceList(expenceList: _exepenceList)]),
-    );
+        ),
+      );
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Expence Master"),
+          backgroundColor: Colors.lightBlue,
+          elevation: 0,
+          actions: [
+            Container(
+              color: const Color.fromARGB(255, 94, 208, 73),
+              child: IconButton(
+                color: Colors.black,
+                onPressed: _openAddExpencesOverlay,
+                icon: const Icon(Icons.add),
+              ),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            ExpenceList(
+              expenceList: _exepenceList,
+              onDeleExpence: onDeleteExpence,
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
