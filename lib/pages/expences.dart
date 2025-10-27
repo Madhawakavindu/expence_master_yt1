@@ -1,7 +1,11 @@
+import 'dart:ffi';
+
 import 'package:expence_master_yt/models/expence.dart';
+import 'package:expence_master_yt/server/database.dart';
 import 'package:expence_master_yt/widgets/add_new_expences.dart';
 import 'package:expence_master_yt/widgets/expence_list.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:pie_chart/pie_chart.dart';
 
 class Expences extends StatefulWidget {
@@ -13,28 +17,9 @@ class Expences extends StatefulWidget {
 
 class _ExpencesState extends State<Expences> {
   //expenceList
-  final List<ExepenceModel> _exepenceList = [
-    ExepenceModel(
-      title: "Football",
-      amount: 12.5,
-      date: DateTime.now(),
-      category: Category.leasure,
-    ),
-
-    ExepenceModel(
-      title: "Carrot",
-      amount: 18,
-      date: DateTime.now(),
-      category: Category.food,
-    ),
-
-    ExepenceModel(
-      title: "Bag",
-      amount: 20,
-      date: DateTime.now(),
-      category: Category.travel,
-    ),
-  ];
+  //final List<ExepenceModel> _exepenceList = [];
+  final _myBox = Hive.box("expenceDatabase");
+  Database db = Database();
 
   Map<String, double> dataMap = {
     "Food": 5,
@@ -47,8 +32,10 @@ class _ExpencesState extends State<Expences> {
   //(3) aluth expence ek hdnw.ita pass expence list ekt add krnw
   void onAddNewExpence(ExepenceModel expence) {
     setState(() {
-      _exepenceList.add(expence);
+      db.expenceList.add(expence);
+      calCategoryValues();
     });
+    db.updateData();
   }
 
   //function to open a model overlay
@@ -62,20 +49,16 @@ class _ExpencesState extends State<Expences> {
     );
   }
 
-  void addNewExpences(ExepenceModel expence) {
-    setState(() {
-      _exepenceList.add(expence);
-    });
-  }
-
   //remove a expence
   void onDeleteExpence(ExepenceModel expence) {
     //store the delecting expence
     ExepenceModel deletingExpence = expence;
     //get the index of the removing expence
-    final int removingIndex = _exepenceList.indexOf(expence);
+    final int removingIndex = db.expenceList.indexOf(expence);
     setState(() {
-      _exepenceList.remove(expence);
+      db.expenceList.remove(expence);
+      db.updateData();
+      calCategoryValues();
     });
 
     //show snackbar
@@ -86,7 +69,9 @@ class _ExpencesState extends State<Expences> {
           label: "Undo",
           onPressed: () {
             setState(() {
-              _exepenceList.insert(removingIndex, deletingExpence);
+              db.expenceList.insert(removingIndex, deletingExpence);
+              db.updateData();
+              calCategoryValues();
             });
           },
         ),
@@ -99,6 +84,56 @@ class _ExpencesState extends State<Expences> {
   double travelVal = 0;
   double leasureVal = 0;
   double workVal = 0;
+
+  void calCategoryValues() {
+    double foodValTotal = 0;
+    double travelValTotal = 0;
+    double leasureValTotal = 0;
+    double workValTotal = 0;
+
+    for (final expence in db.expenceList) {
+      if (expence.category == Category.food) {
+        foodValTotal += expence.amount;
+      }
+      if (expence.category == Category.leasure) {
+        leasureValTotal += expence.amount;
+      }
+      if (expence.category == Category.travel) {
+        travelValTotal += expence.amount;
+      }
+      if (expence.category == Category.work) {
+        workValTotal += expence.amount;
+      }
+    }
+    setState(() {
+      foodVal = foodValTotal;
+      leasureVal = leasureValTotal;
+      travelVal = travelValTotal;
+      workVal = workValTotal;
+    });
+
+    //update the datamap
+    dataMap = {
+      "Food": foodVal,
+      "Travel": travelVal,
+      "Leasure": leasureVal,
+      "Work": workVal,
+    };
+  }
+
+  @override
+  void initState() {
+    //widget ek build wenwth ekkm calCategory ek run krnn
+    super.initState();
+    //if this is the first time create the initial data
+    if (_myBox.get("EXP_DATA") == null) {
+      db.createInitialDatabase();
+      calCategoryValues();
+    } else {
+      db.loadData();
+      calCategoryValues();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +157,7 @@ class _ExpencesState extends State<Expences> {
         children: [
           PieChart(dataMap: dataMap),
           ExpenceList(
-            expenceList: _exepenceList,
+            expenceList: db.expenceList,
             onDeleExpence: onDeleteExpence,
           ),
         ],

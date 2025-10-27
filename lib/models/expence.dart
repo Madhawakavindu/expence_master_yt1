@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+// type id ek import karaganna mulinma(1)
+import 'package:hive/hive.dart';
+
+//(6) next you can open terminal and type > dart run build_runner build
+part 'expence.g.dart';
 
 final uuid = const Uuid().v4();
 
@@ -20,6 +25,8 @@ final CategoryIcons = {
   Category.work: Icons.work,
 };
 
+//hive type ekk hadaganna (2)
+@HiveType(typeId: 1)
 class ExepenceModel {
   //constructor
   ExepenceModel({
@@ -29,10 +36,20 @@ class ExepenceModel {
     required this.category,
   }) : id = uuid;
 
+  // dan hive field hadaganna(3)
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String title;
+
+  @HiveField(2)
   final double amount;
+
+  @HiveField(3)
   final DateTime date;
+
+  @HiveField(4)
   final Category category;
 
   //getter > formated date
